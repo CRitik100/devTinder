@@ -23,36 +23,6 @@ app.get("/admin/user/:userId/img{.:ext}/*imgPath", (req, res) => {
   });
 });
 
-/**
- * 1. URL: http://localhost:1111/admin/user/123/img/Shankar Nagar?city=mumbai
- * output:
- * {
-    "firstName": "Vickey",
-    "lastName": "Chavan",
-    "userId": "123",
-    "imgPath": [
-        "Shankar Nagar"
-    ],
-    "queryParameter": {
-        "city": "mumbai"
-    }
-}
- * 2. URL: http://localhost:1111/admin/user/123/img.png/Shankar Nagar?city=mumbai
- * output:
- * {
-    "firstName": "Vickey",
-    "lastName": "Chavan",
-    "userId": "123",
-    "optionalSegments": "png",
-    "imgPath": [
-        "Shankar Nagar"
-    ],
-    "queryParameter": {
-        "city": "mumbai"
-    }
-} 
- */
-
 app.post("/admin/user", (req, res) => {
   // Logic the save the data to DB.
   res.send("New data has been saved successfully..!!");
@@ -72,5 +42,13 @@ app.delete("/admin/user", (req, res) => {
 
 app.get("/external/user", externalAuth, (req, res) => {
   console.log("This is External User.");
+  // if some error occured then ideally it should be handled with try and catch block.
+  throw new Error("Something went wrong");
   res.send("Limited data.");
+});
+
+// This is the Error handling Middleware, which will be called if only any unhadled error occured.
+app.use("/", (err, req, res, next) => {
+  console.log("Some error is on our side.");
+  res.status(500).send("Internal server Error");
 });
