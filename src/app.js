@@ -1,4 +1,5 @@
 const express = require("express");
+const { adminAuth, externalAuth } = require("./middlewares/auth");
 
 const app = express();
 
@@ -6,7 +7,10 @@ app.listen(1111, () => {
   console.log("Server is Successfully listning to the PORT : 1111");
 });
 
-app.get("/user/:userId/img{.:ext}/*imgPath", (req, res) => {
+// The use function is accpting all the request whether it is GET, POST, PUT, DELETE, PATCH, etc.
+app.use("/admin", adminAuth);
+
+app.get("/admin/user/:userId/img{.:ext}/*imgPath", (req, res) => {
   // Logic to fetch the user data from DB.
   console.log("Fetch the user Data.");
   res.send({
@@ -20,7 +24,7 @@ app.get("/user/:userId/img{.:ext}/*imgPath", (req, res) => {
 });
 
 /**
- * 1. URL: http://localhost:1111/user/123/img/Shankar Nagar?city=mumbai
+ * 1. URL: http://localhost:1111/admin/user/123/img/Shankar Nagar?city=mumbai
  * output:
  * {
     "firstName": "Vickey",
@@ -33,7 +37,7 @@ app.get("/user/:userId/img{.:ext}/*imgPath", (req, res) => {
         "city": "mumbai"
     }
 }
- * 2. URL: http://localhost:1111/user/123/img.png/Shankar Nagar?city=mumbai
+ * 2. URL: http://localhost:1111/admin/user/123/img.png/Shankar Nagar?city=mumbai
  * output:
  * {
     "firstName": "Vickey",
@@ -49,25 +53,24 @@ app.get("/user/:userId/img{.:ext}/*imgPath", (req, res) => {
 } 
  */
 
-app.post("/user", (req, res) => {
+app.post("/admin/user", (req, res) => {
   // Logic the save the data to DB.
-  console.log("Create the new user.");
-  res.send("New user has been saved successfully..!!");
+  res.send("New data has been saved successfully..!!");
 });
 
-app.patch("/user", (req, res) => {
+app.patch("/admin/user", (req, res) => {
   //Logic the update the existing user Data.
   console.log("Update the users existing Data.");
   res.send("Updated the desired user data..!!");
 });
 
-app.delete("/user", (req, res) => {
+app.delete("/admin/user", (req, res) => {
   // logic to delete the user from the DB.
-  console.log("Remove the user data from the DB");
-  res.send("User data has been removed successfully..!!");
+  console.log("Remove the data from the DB");
+  res.send("Data has been removed successfully..!!");
 });
 
-// The use function is accpting all the request whether it is GET, POST, PUT, DELETE, PATCH, etc.
-app.use("/user", (req, res) => {
-  res.send("Are you ready...?");
+app.get("/external/user", externalAuth, (req, res) => {
+  console.log("This is External User.");
+  res.send("Limited data.");
 });
