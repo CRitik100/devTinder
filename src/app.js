@@ -1,54 +1,112 @@
 const express = require("express");
-const { adminAuth, externalAuth } = require("./middlewares/auth");
+const { connectDB } = require("./config/database");
+const { User } = require("./models/user");
 
 const app = express();
 
-app.listen(1111, () => {
-  console.log("Server is Successfully listning to the PORT : 1111");
-});
-
-// The use function is accpting all the request whether it is GET, POST, PUT, DELETE, PATCH, etc.
-app.use("/admin", adminAuth);
-
-app.get("/admin/user/:userId/img{.:ext}/*imgPath", (req, res) => {
-  // Logic to fetch the user data from DB.
-  console.log("Fetch the user Data.");
-  res.send({
-    firstName: "Vickey",
-    lastName: "Chavan",
-    userId: req.params.userId, // Named Parameter
-    optionalSegments: req.params.ext, // Optional Segments
-    imgPath: req.params.imgPath, // Wildcard Parameter
-    queryParameter: req.query, // Query Parameter
+connectDB()
+  .then(() => {
+    console.log("DB is connected..🚀");
+    app.listen(1111, () => {
+      console.log("Server is Successfully listning to the PORT : 1111");
+    });
+  })
+  .catch((err) => {
+    console.log(`DB connection is failed..🥶 ${err.message}`);
   });
+
+app.use(express.json());
+
+// POST "signup" API
+app.post("/signup", async (req, res) => {
+  // creating a document by creating an instance of User model and passing the data to it.
+  const userData = new User(req.body);
+  let opts = {
+    returnDocument: "after",
+    runValidators: true,
+  };
+  try {
+    if (userData?.skills && userData?.skills.length > 5) {
+      throw new Error(`Max 5 Skills can be added..!!`);
+    }
+    await userData.save(); // This will save the document in the collection.
+    res.send("User has been added successfully..!!");
+  } catch (error) {
+    console.log(`Error while saving the new user Data..!! ${error.message}`);
+    res.send("Error while creating the new user..!! \n" + error.message);
+  }
 });
 
-app.post("/admin/user", (req, res) => {
-  // Logic the save the data to DB.
-  res.send("New data has been saved successfully..!!");
+// GET "feed" API -> Suggestions to user to connect with others.
+app.get("/feed", async (req, res) => {
+  try {
+    const data = await User.find().exec();
+    if (!data) {
+      res.status(404).send("Relvent users not found 🤔...!!");
+    } else {
+      res.send(data);
+    }
+  } catch (error) {
+    console.log("Something went wrong...!!");
+  }
 });
 
-app.patch("/admin/user", (req, res) => {
-  //Logic the update the existing user Data.
-  console.log("Update the users existing Data.");
-  res.send("Updated the desired user data..!!");
+// GET "user" API -> By emailId getting the user details.
+app.get("/user", async (req, res) => {
+  const userEmail = req.body;
+  try {
+    const data = await User.findOne(userEmail).exec();
+    if (!data) {
+      res.status(404).send("User not found 🤔...!!");
+    } else {
+      res.send(data);
+    }
+  } catch (error) {
+    console.log("Something went wrong...!!!" + error);
+    res.status(500).send("Something went wrong.");
+  }
 });
 
-app.delete("/admin/user", (req, res) => {
-  // logic to delete the user from the DB.
-  console.log("Remove the data from the DB");
-  res.send("Data has been removed successfully..!!");
+// PATCH "user" API -> Update the user data by user userId;
+app.patch("/user/:userId", async (req, res) => {
+  let allowedUpdate = ["password", "age", "skills", "photo"];
+  let userId = req.params?.userId;
+  let data = req.body;
+  let opts = {
+    returnDocument: "after",
+    runValidators: true,
+  };
+  let check = Object.keys(data).every((k) => allowedUpdate.includes(k));
+  try {
+    if (!check) {
+      throw new Error(`allowed updates => ${allowedUpdate.join(", ")}.`);
+    }
+    if (data?.skills && data?.skills.length > 5) {
+      throw new Error(`Max 5 Skills can be added..!!`);
+    }
+    const updateUserData = await User.findByIdAndUpdate(userId, data, opts);
+    res.send("User data has been updated successfully..!!");
+    console.log(
+      `User data has been updated successfully..!! ${updateUserData}`,
+    );
+  } catch (error) {
+    console.log("Something went wrong...!!!" + error);
+    res.send("Failed to update, " + error.message);
+  }
 });
 
-app.get("/external/user", externalAuth, (req, res) => {
-  console.log("This is External User.");
-  // if some error occured then ideally it should be handled with try and catch block.
-  throw new Error("Something went wrong");
-  res.send("Limited data.");
-});
-
-// This is the Error handling Middleware, which will be called if only any unhadled error occured.
-app.use("/", (err, req, res, next) => {
-  console.log("Some error is on our side.");
-  res.status(500).send("Internal server Error");
+// Delete "user" API -> Delete the user by user emailId;
+app.delete("/user", async (req, res) => {
+  let user = req.body;
+  try {
+    if (!(await User.findOne(user))) {
+      res.status(400).send("user is not present!");
+    } else {
+      await User.findOneAndDelete(user);
+      res.send("user has been deleted succufully.");
+    }
+  } catch (error) {
+    console.log("Something went wrong...!!!" + error);
+    res.status(500).send("Something went wrong.");
+  }
 });
