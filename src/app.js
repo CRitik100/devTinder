@@ -1,5 +1,11 @@
 const express = require("express");
 const { connectDB } = require("./config/database");
+const bcrypt = require("bcrypt");
+
+const {
+  validateSignupData,
+  validateUserUpdateData,
+} = require("./utils/validation");
 const { User } = require("./models/user");
 
 const app = express();
@@ -19,21 +25,41 @@ app.use(express.json());
 
 // POST "signup" API
 app.post("/signup", async (req, res) => {
-  // creating a document by creating an instance of User model and passing the data to it.
-  const userData = new User(req.body);
-  let opts = {
-    returnDocument: "after",
-    runValidators: true,
-  };
   try {
-    if (userData?.skills && userData?.skills.length > 5) {
-      throw new Error(`Max 5 Skills can be added..!!`);
-    }
-    await userData.save(); // This will save the document in the collection.
-    res.send("User has been added successfully..!!");
+    const { firstName, lastName, emailId, password } = req.body;
+    validateSignupData(req);
+
+    const hashedPassword = await bcrypt.hash(password, 11);
+
+    const userData = new User({
+      firstName: firstName,
+      lastName: lastName,
+      emailId: emailId,
+      password: hashedPassword,
+    });
+    await userData.save();
+    res.send("User has been added successfully..✔️");
   } catch (error) {
-    console.log(`Error while saving the new user Data..!! ${error.message}`);
-    res.send("Error while creating the new user..!! \n" + error.message);
+    res.send("Error => " + error.message);
+  }
+});
+
+// GET -> login API.
+app.get("/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
+    const user = await User.findOne({ emailId: emailId });
+    if (!user) {
+      throw new Error("Credentials are not valid");
+    }
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      throw new Error("Credentials are not valid");
+    } else {
+      res.send("LoggedIn Succussfully..✔️");
+    }
+  } catch (error) {
+    res.send("Error => " + error.message);
   }
 });
 
@@ -69,21 +95,11 @@ app.get("/user", async (req, res) => {
 
 // PATCH "user" API -> Update the user data by user userId;
 app.patch("/user/:userId", async (req, res) => {
-  let allowedUpdate = ["password", "age", "skills", "photo"];
   let userId = req.params?.userId;
   let data = req.body;
-  let opts = {
-    returnDocument: "after",
-    runValidators: true,
-  };
-  let check = Object.keys(data).every((k) => allowedUpdate.includes(k));
+  let opts = { returnDocument: "after", runValidators: true };
   try {
-    if (!check) {
-      throw new Error(`allowed updates => ${allowedUpdate.join(", ")}.`);
-    }
-    if (data?.skills && data?.skills.length > 5) {
-      throw new Error(`Max 5 Skills can be added..!!`);
-    }
+    validateUserUpdateData(req);
     const updateUserData = await User.findByIdAndUpdate(userId, data, opts);
     res.send("User data has been updated successfully..!!");
     console.log(
@@ -91,7 +107,7 @@ app.patch("/user/:userId", async (req, res) => {
     );
   } catch (error) {
     console.log("Something went wrong...!!!" + error);
-    res.send("Failed to update, " + error.message);
+    res.send("Error => " + error.message);
   }
 });
 

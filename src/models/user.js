@@ -7,11 +7,15 @@ const userSchema = new mongoose.Schema(
     firstName: {
       type: String,
       required: [true, "user first Name is mandatory"],
-      minLength: 3,
-      maxLength: 50,
+      minLength: [3, "Min length of first name should be 3."],
+      maxLength: [50, "Max length of first name should be 50."],
       trim: true,
     },
-    lastName: { type: String, minLength: 2, maxLength: 50 },
+    lastName: {
+      type: String,
+      minLength: [2, "Min length of last name should be 2."],
+      maxLength: [50, "Max length of last name should be 50."],
+    },
     emailId: {
       type: String,
       required: [true, "use emailId is mandatory"],
@@ -22,17 +26,17 @@ const userSchema = new mongoose.Schema(
         validator: function (v) {
           return validator.isEmail(v);
         },
-        message: "Entered email is not a valid email address!",
+        message: "Entered email is not a valid.",
       },
     },
     password: {
       type: String,
-      required: [true, "Password is mandatory"],
+      required: [true, "Password is mandatory."],
       validate: {
         validator: function (v) {
           return validator.isStrongPassword(v);
         },
-        message: (props) => `enter a strong Password : ${props.value}`,
+        message: `enter a strong Password.\n`,
       },
     },
     age: {
