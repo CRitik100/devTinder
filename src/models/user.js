@@ -10,13 +10,15 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "user first Name is mandatory"],
       minLength: [3, "Min length of first name should be 3."],
-      maxLength: [50, "Max length of first name should be 50."],
+      maxLength: [11, "Max length of first name should be 11."],
       trim: true,
+      match: [/^[a-zA-Z]+$/, "It can only contain letters."],
     },
     lastName: {
       type: String,
       minLength: [2, "Min length of last name should be 2."],
-      maxLength: [50, "Max length of last name should be 50."],
+      maxLength: [11, "Max length of last name should be 11."],
+      match: [/^[a-zA-Z]+$/, "It can only contain letters."],
     },
     emailId: {
       type: String,
@@ -72,13 +74,18 @@ const userSchema = new mongoose.Schema(
     },
     about: {
       type: String,
-      max: [150, "Max char can be 150."],
+      max: [150, "Max allowed char can be 150."],
     },
   },
   {
     timestamps: true,
   },
 );
+
+userSchema.methods.getHashedPassword = async function (password) {
+  const hashedPassword = await bcrypt.hash(password, 11);
+  return hashedPassword;
+};
 
 userSchema.methods.getJWT = function () {
   const user = this;
@@ -90,6 +97,7 @@ userSchema.methods.getJWT = function () {
 
 userSchema.methods.isPasswordValid = async function (enteredPassword) {
   const user = this;
+  if (typeof enteredPassword !== "string") return false;
   const check = await bcrypt.compare(enteredPassword, user.password);
   return check;
 };

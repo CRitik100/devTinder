@@ -11,18 +11,17 @@ authRouter.post("/signup", async (req, res) => {
     const { firstName, lastName, emailId, password } = req.body;
     validateSignupData(req);
 
-    const hashedPassword = await bcrypt.hash(password, 11);
-
     const userData = new User({
       firstName: firstName,
       lastName: lastName,
       emailId: emailId,
-      password: hashedPassword,
     });
+
+    userData.password = await userData.getHashedPassword(password);
     await userData.save();
     res.send("User has been added successfully..✔️");
   } catch (error) {
-    res.send("Error => " + error.message);
+    res.status(400).send("Error => " + error.message);
   }
 });
 
@@ -45,7 +44,7 @@ authRouter.post("/login", async (req, res) => {
       res.send("LoggedIn Succussfully..✔️");
     }
   } catch (error) {
-    res.send("Error => " + error.message);
+    res.status(401).send("Error => " + error.message);
   }
 });
 
