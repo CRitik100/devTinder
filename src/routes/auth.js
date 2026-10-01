@@ -40,13 +40,21 @@ authRouter.post("/login", async (req, res) => {
     else {
       const token = user.getJWT();
       res.cookie("token", token, {
-        expires: new Date(Date.now() + 8 * 3600000),
+        expires: new Date(Date.now()),
       });
       res.send("LoggedIn Succussfully..✔️");
     }
   } catch (error) {
     res.send("Error => " + error.message);
   }
+});
+
+// POST "logout" API.
+authRouter.post("/logout", (req, res) => {
+  res.cookie("token", null, {
+    expires: new Date(Date.now()),
+  });
+  res.send("User logged out succussfullly.");
 });
 
 module.exports = authRouter;

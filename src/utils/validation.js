@@ -5,9 +5,9 @@ const validateSignupData = (req) => {
   }
 };
 
-const validateUserUpdateData = (req) => {
+const validateUpdateProfileData = (req) => {
   const data = req.body;
-  const allowedUpdate = ["password", "age", "skills", "photo"];
+  const allowedUpdate = ["firstName","lastName","about", "age", "skills", "photo"];
 
   let check = Object.keys(data).every((k) => allowedUpdate.includes(k));
 
@@ -18,4 +18,4 @@ const validateUserUpdateData = (req) => {
   }
 };
 
-module.exports = { validateSignupData, validateUserUpdateData };
+module.exports = { validateSignupData, validateUpdateProfileData };

@@ -70,6 +70,10 @@ const userSchema = new mongoose.Schema(
         message: (props) => `Invalid URL : ${props.value}`,
       },
     },
+    about: {
+      type: String,
+      max: [150, "Max char can be 150."],
+    },
   },
   {
     timestamps: true,

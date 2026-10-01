@@ -15,7 +15,7 @@ app.use("/", authRouter, profileRouter, requestRouter);
 connectDB()
   .then(() => {
     console.log("DB is connected..🚀");
-    app.listen(1111, () => {
+    app.listen(3333, () => {
       console.log("Server is Successfully listning to the PORT : 1111");
     });
   })
