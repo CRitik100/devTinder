@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 // This is the Schema, which defines the structure of the document in the collection. It is like a blueprint of the document.
 const userSchema = new mongoose.Schema(
@@ -74,7 +76,20 @@ const userSchema = new mongoose.Schema(
   },
 );
 
-// This is the model, which will take the Schema and help to perform the actions on DB like Create, Read, Update, Delete (CRUD) operations.
+userSchema.methods.getJWT = function () {
+  const user = this;
+  const token = jwt.sign({ userId: user._id }, "devTinder", {
+    expiresIn: "7d",
+  });
+  return token;
+};
+
+userSchema.methods.isPasswordValid = async function (enteredPassword) {
+  const user = this;
+  const check = await bcrypt.compare(enteredPassword, user.password);
+  return check;
+};
+
 const User = mongoose.model("User", userSchema);
 
 module.exports = { User };

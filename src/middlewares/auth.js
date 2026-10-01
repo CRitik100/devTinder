@@ -1,21 +1,23 @@
-const adminAuth = (req, res, next) => {
-  const logInToken = "admin";
-  if (logInToken == "admin") {
-    console.log("Authorized Admin user.");
-    next();
-  } else {
-    res.status(401).send("Unauthorized User...!!!");
+const { User } = require("../models/user");
+const jwt = require("jsonwebtoken");
+
+const userAuth = async (req, res, next) => {
+  try {
+    const { token } = req.cookies;
+    if (!token) {
+      throw new Error("pls login.");
+    }
+    const {userId}  = jwt.verify(token, "devTinder");
+    const userData = await User.findById(userId);
+    if (userData) {
+      req.user = userData;
+      next();
+    } else {
+      throw new Error("user does not exist.");
+    }
+  } catch (error) {
+    res.status(404).send(error.message);
   }
 };
 
-const externalAuth = (req, res, next) => {
-  const logInToken = "external";
-  if (logInToken == "external") {
-    console.log("Authorized External user.");
-    next();
-  } else {
-    res.status(401).send("Unauthorized user..!!");
-  }
-};
-
-module.exports = { adminAuth, externalAuth };
+module.exports = { userAuth };
