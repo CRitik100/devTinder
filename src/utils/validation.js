@@ -1,4 +1,6 @@
 const validator = require("validator");
+const { User } = require("../models/user");
+const Connection = require("../models/connection");
 
 const validateSignupData = (req) => {
   const { emailId, password } = req.body;
@@ -40,8 +42,36 @@ const validateNewProfilePassword = async (req) => {
   }
 };
 
+const validateConnectionRequest = async (req) => {
+  const allowedStatus = ["ignored", "interested"];
+  const fromUserId = req.user._id;
+  const toUserId = req.params.toUserId;
+  const status = req.params.connectionStatus;
+
+  if (!allowedStatus.includes(status)) {
+    throw new Error(`${status} request is not allowed.`);
+  }
+
+  const isUserInDB = await User.findById(toUserId);
+  if (!isUserInDB) {
+    throw new Error("sending the req to invalid user.");
+  }
+  req.toUser = isUserInDB;
+  if (
+    await Connection.findOne({
+      $or: [
+        { fromUserId: fromUserId, toUserId: toUserId },
+        { fromUserId: toUserId, toUserId: fromUserId },
+      ],
+    })
+  ) {
+    throw new Error("Req has already been made.");
+  }
+};
+
 module.exports = {
   validateSignupData,
   validateUpdateProfileData,
   validateNewProfilePassword,
+  validateConnectionRequest,
 };
