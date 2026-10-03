@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { User } = require("./user");
 const { Schema } = mongoose;
 
 const connectionSchema = new Schema(
@@ -6,10 +7,12 @@ const connectionSchema = new Schema(
     fromUserId: {
       type: Schema.Types.ObjectId,
       required: true,
+      ref: "User",
     },
     toUserId: {
       type: Schema.Types.ObjectId,
       required: true,
+      ref: "User",
     },
     connectionStatus: {
       type: String,

@@ -69,9 +69,18 @@ const validateConnectionRequest = async (req) => {
   }
 };
 
+const validateConnectionReview = (req) => {
+  const { connectionStatus } = req.params;
+  const allowedStatus = ["accepted", "rejected"];
+  if (!allowedStatus.includes(connectionStatus)) {
+    throw new Error(`${connectionStatus} is not allowed here.`);
+  }
+};
+
 module.exports = {
   validateSignupData,
   validateUpdateProfileData,
   validateNewProfilePassword,
   validateConnectionRequest,
+  validateConnectionReview,
 };
