@@ -20,14 +20,15 @@ const validateUpdateProfileData = (req) => {
     "age",
     "skills",
     "photo",
+    "gender",
   ];
 
   let check = Object.keys(data).every((k) => allowedUpdate.includes(k));
 
   if (!check) {
     throw new Error(`allowed updates are ${allowedUpdate.join(", ")}.`);
-  } else if (data?.skills && data?.skills.length > 5) {
-    throw new Error(`Max 5 Skills can be added..!!`);
+  } else if (data?.skills && data?.skills.length > 11) {
+    throw new Error(`Max 11 Skills can be added..!!`);
   }
 };
 

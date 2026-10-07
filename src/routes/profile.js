@@ -26,7 +26,7 @@ profileRouter.patch("/profile/update", userAuth, async (req, res) => {
       data: loggedInUser,
     });
   } catch (error) {
-    res.status(400).send("Error => " + error.message);
+    res.status(400).json("Error => " + error.message);
   }
 });
 

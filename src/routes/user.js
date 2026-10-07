@@ -4,7 +4,7 @@ const userRouter = express.Router({ caseSensitive: true, strict: true });
 const Connection = require("../models/connection");
 const { User } = require("../models/user");
 
-const USER_SAFE_DATA = "firstName lastName photo about";
+const USER_SAFE_DATA = "firstName lastName photo about age gender skills";
 
 // GET - all the pending request.
 userRouter.get("/user/request/received", userAuth, async (req, res) => {
