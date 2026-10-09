@@ -7,7 +7,7 @@ const userAuth = async (req, res, next) => {
     if (!token) {
       return res.status(401).send("Unauthrized user.");
     }
-    const { userId } = jwt.verify(token, "devTinder");
+    const { userId } = jwt.verify(token, process.env.JWT_TOKEN);
     const userData = await User.findById(userId);
     if (userData) {
       req.user = userData;

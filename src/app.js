@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const { connectDB } = require("./config/database");
 const cookieParser = require("cookie-parser");
@@ -18,8 +19,10 @@ app.use("/", authRouter, profileRouter, requestRouter, userRouter);
 connectDB()
   .then(() => {
     console.log("DB is connected..🚀");
-    app.listen(3333, () => {
-      console.log("Server is Successfully listning to the PORT : 3333");
+    app.listen(process.env.PORT, () => {
+      console.log(
+        `Server is Successfully listning to the PORT : ${process.env.PORT}`,
+      );
     });
   })
   .catch((err) => {

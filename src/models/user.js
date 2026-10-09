@@ -90,7 +90,7 @@ userSchema.methods.getHashedPassword = async function (password) {
 
 userSchema.methods.getJWT = function () {
   const user = this;
-  const token = jwt.sign({ userId: user._id }, "devTinder", {
+  const token = jwt.sign({ userId: user._id }, process.env.JWT_TOKEN, {
     expiresIn: "7d",
   });
   return token;
