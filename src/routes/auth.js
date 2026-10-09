@@ -2,6 +2,8 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const { User } = require("../models/user");
 const { validateSignupData } = require("../utils/validation");
+const sendEmail = require("../utils/services/email/sendEmail");
+const welcomeEmail = require("../utils/services/email/templates/welcome");
 
 const authRouter = express.Router({ caseSensitive: true, strict: true });
 
@@ -23,7 +25,12 @@ authRouter.post("/signup", async (req, res) => {
     res.cookie("token", token, {
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
     });
-
+    const emailData = welcomeEmail(user.firstName);
+    sendEmail.run({
+      ...emailData,
+      from: "devTinder <hello@devtinder11.com>",
+      to: user.emailId,
+    });
     res.json({ message: "User has been added successfully..✔️", data: user });
   } catch (error) {
     res.status(400).send("Error => " + error.message);

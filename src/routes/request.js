@@ -5,6 +5,8 @@ const {
   validateConnectionRequest,
   validateConnectionReview,
 } = require("../utils/validation");
+const sendEmail = require("../utils/services/email/sendEmail");
+const connectionRequestEmail = require("../utils/services/email/templates/connectionRequest");
 
 const requestRouter = express.Router({ caseSensitive: true, strict: true });
 
@@ -27,11 +29,25 @@ requestRouter.post(
       });
 
       const data = await newReq.save();
+      if (connectionStatus == "interested") {
+        const emailData = connectionRequestEmail({
+          toName: req.toUser.firstName,
+          fromName: req.user.firstName,
+          fromAbout: req.user.about,
+        });
+        const email = await sendEmail.run({
+          ...emailData,
+          from: "devTinder <notifications@devtinder11.com>",
+          to: req.toUser.emailId,
+        });
+        console.log(email);
+      }
       res.json({
         message: `${req.user.firstName} your request has been sent successfuly to ${req.toUser.firstName}..🎉`,
         data,
       });
     } catch (error) {
+      console.log(error);
       res.status(400).send("Error => " + error.message);
     }
   },
