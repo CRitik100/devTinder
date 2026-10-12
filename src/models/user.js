@@ -57,9 +57,9 @@ const userSchema = new mongoose.Schema(
       type: [String],
       validate: {
         validator: function (v) {
-          return v.every((skill) => skill.length < 11);
+          return v.every((skill) => skill.length < 21);
         },
-        message: "each skill must be at most 10 characters long.",
+        message: "each skill must be at most 21 characters long.",
       },
     },
     photo: {

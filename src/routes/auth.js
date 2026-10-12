@@ -27,9 +27,9 @@ authRouter.post("/signup", async (req, res) => {
     });
     const emailData = welcomeEmail(user.firstName);
     sendEmail.run({
-      ...emailData,
       from: "devTinder <hello@devtinder11.com>",
       to: user.emailId,
+      ...emailData,
     });
     res.json({ message: "User has been added successfully..✔️", data: user });
   } catch (error) {

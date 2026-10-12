@@ -36,11 +36,10 @@ requestRouter.post(
           fromAbout: req.user.about,
         });
         const email = await sendEmail.run({
-          ...emailData,
           from: "devTinder <notifications@devtinder11.com>",
           to: req.toUser.emailId,
+          ...emailData,
         });
-        console.log(email);
       }
       res.json({
         message: `${req.user.firstName} your request has been sent successfuly to ${req.toUser.firstName}..🎉`,
