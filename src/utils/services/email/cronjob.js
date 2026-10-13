@@ -7,35 +7,39 @@ const pendingRequestsEmail = require("./templates/pendingRequestsEmail");
 
 const USER_SAFE_DATA = "firstName lastName emailId";
 
-cronjob.schedule("0 8 * * *", async () => {
-  try {
-    const yesterday = subDays(new Date(), 1);
-    const yesterdayStart = startOfDay(yesterday);
-    const yesterdayEnd = endOfDay(yesterday);
+cronjob.schedule(
+  "0 8 * * *",
+  async () => {
+    try {
+      const yesterday = subDays(new Date(), 1);
+      const yesterdayStart = startOfDay(yesterday);
+      const yesterdayEnd = endOfDay(yesterday);
 
-    const pendingYesterdayConnection = await Connection.find(
-      {
-        connectionStatus: "interested",
-        createdAt: {
-          $gte: yesterdayStart,
-          $lt: yesterdayEnd,
+      const pendingYesterdayConnection = await Connection.find(
+        {
+          connectionStatus: "interested",
+          createdAt: {
+            $gte: yesterdayStart,
+            $lt: yesterdayEnd,
+          },
         },
-      },
-      "toUserId",
-    ).populate("toUserId", USER_SAFE_DATA);
+        "toUserId",
+      ).populate("toUserId", USER_SAFE_DATA);
 
-    const filterUniqueUser = new Set(
-      pendingYesterdayConnection.map((data) => data.toUserId),
-    );
-        for (const user of filterUniqueUser) {
-      const emailData = pendingRequestsEmail(user.firstName);
-      const data = await sendEmail.run({
-        from: "devTinder <notifications@devtinder11.com>",
-        to: user.emailId,
-        ...emailData,
-      });
+      const filterUniqueUser = new Set(
+        pendingYesterdayConnection.map((data) => data.toUserId),
+      );
+      for (const user of filterUniqueUser) {
+        const emailData = pendingRequestsEmail(user.firstName);
+        await sendEmail.run({
+          from: "devTinder <notifications@devtinder11.com>",
+          to: user.emailId,
+          ...emailData,
+        });
+      }
+    } catch (error) {
+      console.log("Error => " + error.message);
     }
-  } catch (error) {
-    console.log("Error => " + error.message);
-  }
-});
+  },
+  { timezone: "Asia/Kolkata" },
+);
