@@ -8,6 +8,7 @@ const profileRouter = require("./routes/profile");
 const requestRouter = require("./routes/request");
 const userRouter = require("./routes/user");
 const cors = require("cors");
+const http = require("http");
 
 const app = express();
 
@@ -17,10 +18,12 @@ app.use(cookieParser());
 
 app.use("/", authRouter, profileRouter, requestRouter, userRouter);
 
+const server = http.createServer(app);
+
 connectDB()
   .then(() => {
     console.log("DB is connected..🚀");
-    app.listen(process.env.PORT, () => {
+    server.listen(process.env.PORT, () => {
       console.log(
         `Server is Successfully listning to the PORT : ${process.env.PORT}`,
       );
