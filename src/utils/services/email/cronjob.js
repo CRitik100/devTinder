@@ -9,12 +9,13 @@ const USER_SAFE_DATA = "firstName lastName emailId";
 
 cronjob.schedule("0 8 * * *", async () => {
   try {
-    const yesterday = subDays(new Date(), 0);
+    const yesterday = subDays(new Date(), 1);
     const yesterdayStart = startOfDay(yesterday);
     const yesterdayEnd = endOfDay(yesterday);
 
     const pendingYesterdayConnection = await Connection.find(
       {
+        connectionStatus: "interested",
         createdAt: {
           $gte: yesterdayStart,
           $lt: yesterdayEnd,
@@ -26,7 +27,7 @@ cronjob.schedule("0 8 * * *", async () => {
     const filterUniqueUser = new Set(
       pendingYesterdayConnection.map((data) => data.toUserId),
     );
-    for (const user of filterUniqueUser) {
+        for (const user of filterUniqueUser) {
       const emailData = pendingRequestsEmail(user.firstName);
       const data = await sendEmail.run({
         from: "devTinder <notifications@devtinder11.com>",
