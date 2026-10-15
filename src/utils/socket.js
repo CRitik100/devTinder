@@ -9,8 +9,6 @@ const initializeSocket = (server) => {
   io.on("connection", (socket) => {
     console.log(`Connected: ${socket.id}`);
 
-    //Events Handler.
-
     socket.on("let's chat", async ({ fromUserId, toUserId, fromUserName }) => {
       const roomId = [fromUserId, toUserId].sort().join("_");
       socket.join(roomId);
