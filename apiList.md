@@ -23,3 +23,7 @@
 2.  GET - /user/connection
 3.  GET - /user/feed
 
+## chat
+
+1. GET - /chat/:toUserId
+
